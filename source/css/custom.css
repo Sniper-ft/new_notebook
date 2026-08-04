@@ -1,0 +1,80 @@
+/* =========================================================
+   个人主页自定义样式库 custom.css
+   英文非正文：花体/连笔字；中文非正文：行楷书法
+   所有正文与目录(TOC)：系统默认现代字体
+   ========================================================= */
+
+/* 1. 引入 WebFont 字体支持 (真正的中国连绵行书 Zhi Mang Xing 志莽行书 & Liu Jian Mao Cao 刘建毛草 & Long Cang 龙藏行草 + 英文华丽连笔 Great Vibes) */
+@import url("https://fonts.googleapis.com/css2?family=Zhi+Mang+Xing&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Great+Vibes&family=Dancing+Script:wght@500;700&display=swap");
+@import url("https://gcore.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css");
+
+/* 2. 非正文部分（中文首选正宗行书：Zhi Mang Xing 志莽行书、Liu Jian Mao Cao 刘建毛草、Long Cang 龙藏行草） */
+#subtitle,
+.banner-text,
+.navbar,
+.navbar-brand,
+.nav-item,
+.index-header a,
+.index-excerpt,
+.post-metas,
+.archive-list,
+.category-list,
+.tag-list,
+.pagination,
+footer,
+.post-title,
+.post-subtitle,
+.board-title {
+  font-family: "Great Vibes", "Dancing Script", "Zhi Mang Xing", "Liu Jian Mao Cao", "Long Cang", "STXingkai", "华文行楷", "Xingkai SC", "LXGW WenKai", "KaiTi", "楷体", cursive, sans-serif !important;
+}
+
+/* 3. 所有正文部分（.markdown-body）以及所有目录 TOC (#toc, .toc 等)，全量重置回现代系统的标准正文清晰字体 */
+.markdown-body,
+.markdown-body *:not(code):not(pre),
+#toc,
+#toc *,
+.toc,
+.toc *,
+.toc-header,
+.toc-body,
+#toc-bot,
+#toc-bot * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif !important;
+}
+
+/* 4. 视觉优化：非正文字体适当加大以补充书法与连笔字体的字面间隙 */
+/* 4.1 仅限首页（.home-banner）：副标题和光标拥有大字号、蓝色、以及向右下的自定义位移 */
+.home-banner #subtitle,
+.home-banner .typed-cursor {
+  white-space: pre-wrap;
+  line-height: 1.85;
+  font-size: 3.05rem !important;
+  font-weight: 500;
+  color: #072ef3 !important;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  display: inline-block;
+  transform: translate(350px, 150px);
+}
+
+/* 4.2 所有其他普通子页面（非首页）：严格保持纯白字体、不偏移、标准居中显示 */
+.banner:not(.home-banner) #subtitle,
+.banner:not(.home-banner) .typed-cursor {
+  color: #ffffff !important;
+  font-size: 2.0rem !important;
+  transform: none !important;
+  display: inline !important;
+}
+
+.navbar-brand {
+  font-size: 1.55rem !important;
+}
+
+.index-header a {
+  font-size: 1.65rem !important;
+}
+
+/* 5. 正文大小调整为清晰易读的默认现代字号与黄金排版间距 */
+.markdown-body {
+  font-size: 1.05rem !important;
+  line-height: 1.75;
+}
