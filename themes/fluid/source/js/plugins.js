@@ -104,58 +104,61 @@ Fluid.plugins = {
       return;
     }
 
-    function getBgClass(ele) {
-      return Fluid.utils.getBackgroundLightness(ele) >= 0 ? 'code-widget-light' : 'code-widget-dark';
-    }
-
-    var copyTmpl = '';
-    copyTmpl += '<div class="code-widget">';
-    copyTmpl += 'LANG';
-    copyTmpl += '</div>';
     jQuery('.markdown-body pre').each(function() {
       var $pre = jQuery(this);
       if ($pre.find('code.mermaid').length > 0) {
         return;
       }
-      if ($pre.find('span.line').length > 0) {
-        return;
+      
+      var $container = $pre;
+      if ($pre.parents('figure.highlight').length > 0) {
+        $container = $pre.parents('figure.highlight');
+      } else if ($pre.parent().hasClass('code-wrapper')) {
+        $container = $pre.parent();
+      } else if ($pre.parent().hasClass('sourceCode')) {
+        $container = $pre.parent();
+        $container.addClass('code-wrapper');
+      } else if ($pre.parent().hasClass('markdown-body')) {
+        $pre.wrap('<div class="code-wrapper"></div>');
+        $container = $pre.parent();
       }
 
-      var lang = '';
+      if ($container.attr('data-processed')) {
+        return;
+      }
+      $container.attr('data-processed', 'true');
 
+      var lang = '';
       if (enableLang) {
         lang = CONFIG.code_language.default;
         if ($pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2 && $pre.children().hasClass('hljs')) {
           lang = $pre[0].children[0].classList[1];
         } else if ($pre[0].getAttribute('data-language')) {
           lang = $pre[0].getAttribute('data-language');
-        } else if ($pre.parent().hasClass('sourceCode') && $pre[0].children.length > 0 && $pre[0].children[0].classList.length >= 2) {
-          lang = $pre[0].children[0].classList[1];
-          $pre.parent().addClass('code-wrapper');
-        } else if ($pre.parent().hasClass('markdown-body') && $pre[0].classList.length === 0) {
-          $pre.wrap('<div class="code-wrapper"></div>');
+        } else if ($container[0].classList.length > 1 && $container.hasClass('highlight')) {
+          lang = $container[0].classList[1];
         }
         lang = lang.toUpperCase().replace('NONE', CONFIG.code_language.default);
+        $container.attr('data-language', lang);
       }
-      $pre.append(copyTmpl.replace('LANG', lang).replace('code-widget">',
-        getBgClass($pre[0]) + (enableCopy ? ' code-widget copy-btn" data-clipboard-snippet><i class="iconfont icon-copy"></i>' : ' code-widget">')));
 
       if (enableCopy) {
-        var clipboard = new ClipboardJS('.copy-btn', {
+        $container.append('<div class="copy-btn" data-clipboard-snippet><span>Copy</span></div>');
+        var clipboard = new ClipboardJS($container.find('.copy-btn')[0], {
           target: function(trigger) {
-            var nodes = trigger.parentNode.childNodes;
-            for (var i = 0; i < nodes.length; i++) {
-              if (nodes[i].tagName === 'CODE') {
-                return nodes[i];
-              }
-            }
+            var codeNode = trigger.parentNode.querySelector('.code pre') || 
+                           trigger.parentNode.querySelector('pre code') || 
+                           trigger.parentNode.querySelector('pre');
+            return codeNode;
           }
         });
         clipboard.on('success', function(e) {
           e.clearSelection();
-          e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-copy', 'icon-success');
+          e.trigger.classList.add('copied');
+          e.trigger.innerHTML = '<span>Copied</span>';
           setTimeout(function() {
-            e.trigger.innerHTML = e.trigger.innerHTML.replace('icon-success', 'icon-copy');
+            e.trigger.classList.remove('copied');
+            e.trigger.innerHTML = '<span>Copy</span>';
           }, 2000);
         });
       }
