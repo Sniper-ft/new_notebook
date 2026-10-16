@@ -4,6 +4,7 @@ tags:
   - 具身感知
 categories:
   - 干正事
+math: true
 ---
 
 常用数据集：MSCOCO
@@ -17,16 +18,16 @@ categories:
   - one-stage methods：推理快（**YOLO**, SSD, RetinaNet）
   - two-stage methods：识别准确率高（Faster R-CNN, Mask R-CNN, Cascade R-CNN）
 
-![alt text](image.png)
+{% asset_img image.png "alt text" %}
 
 - bounding boxes
   - 常用指标：$IoU$（交集与并集的比值）
-![alt text](image-1.png)
+{% asset_img image-1.png "alt text" %}
 # v1
 > You Only Look Once，速度快，适合实时检测；对小物体或相互靠近的物体准确率低（因为 grid system）
 
 ## 模型结构
-![alt text](image-2.png)
+{% asset_img image-2.png "alt text" %}
 - backbone：普通的卷积网络
 - 7x7x30 的 output：训练阶段用它和 input image 算 loss，推理阶段从它得到 bounding box 和 class probabilities
 - input image:
@@ -34,9 +35,9 @@ categories:
   - x, y: 中心点在 grid cell 中的相对位置（按百分比）
   - w, h: 所在 bounding box 相对 full image 的大小（按百分比）
   - class probabilities: 每个具体种类的概率
-![alt text](image-3.png)
+{% asset_img image-3.png "alt text" %}
 
-![alt text](image-4.png)
+{% asset_img image-4.png "alt text" %}
 每一个 grid cell 预测出两个 bounding box （紫色和绿色），每个 bounding box 包含 cofidence 和xywh，$\text{confidence\ score}=Pr(Object)\times IoU, Pr=0或1$，白色方格表示 class probabilies，即$Pr(Class_i | Object)$
 - 注：两个 bounding boxes 是 yolo-v1规定的，class probabilities 由两个 bounding boxes 共享
 - 输出张量维度：$S\times S\times (5\times B+C)=7\times 7\times (5\times2+20)=1470$
@@ -50,12 +51,12 @@ categories:
 ### 损失函数
 $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 
-![alt text](image-5.png)
+{% asset_img image-5.png "alt text" %}
 
 ## 推理阶段
 计算 $Pr(Class_i | Object)\times Pr(Object) \times IoU=Pr(Class_i)\times IoU$，后面两项其实就是 confidence score，整体作为 class-specific confidence score
 
-![alt text](image-6.png)
+{% asset_img image-6.png "alt text" %}
 
 ## NMS（Non-Maximum Suppression）
 
@@ -63,14 +64,14 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 
 按照 class-specific confidence score 排序，低于 thresh1 的归零
 
-![alt text](image-7.png)
+{% asset_img image-7.png "alt text" %}
 
 但看dog这一类，依次与最大值计算IoU，高于 thresh2 会认为在框同一个狗所以把小的归零，低于阈值保留。比完最大的将第二大设置为最大，循环。
 之后依次计算 bicycle 等。得到稀疏矩阵。
-![alt text](image-8.png)
+{% asset_img image-8.png "alt text" %}
 
 选择不全为 0 的 bounding box 画在输出图，选score最大的 class 作为标签。这也导致了一个框只能包含一个物体
-![alt text](image-9.png)
+{% asset_img image-9.png "alt text" %}
 
 # v2
 > 解决v1速度尚可但准确率和召回率较低的问题。
@@ -78,9 +79,9 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 ## Darknet-19
 感受野（receptive field）：特征图上某点看到的输入图像的区域
 
-![alt text](image-10.png)
+{% asset_img image-10.png "alt text" %}
 
-![alt text](image-11.png)
+{% asset_img image-11.png "alt text" %}
 - $3\times 3$ Filters：2个3x3卷积核感受野相当于一个5x5，3个相当于7x7，提取 spatial features
 - $1\times 1$ Filters：降低 dimensions 从而降低计算量
 - 优点：降低参数量提高效率；获得足够 receptive field
@@ -91,39 +92,39 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 1. 缓解内部协变量偏移（internal covariate shift）：训练时后面的layer会随前面的layer变化，丢失已学习特征，导致梯度爆炸或梯度消失，对 lr 等超参要求高，限制非线性激活函数的使用（**这个是初始目标，后续有论文说 batch normalization 能优化训练与ics无关，而是为训练空间引入平滑约束，减少训练波动**）
 2. 使每个 batch 均值为0方差为1，为了保留更多特征引入两个可学习参数
 
-    ![alt text](image-12.png)
+    {% asset_img image-12.png "alt text" %}
     对于 FC 层，作用于特征维度，对每个特征归一化
 
-    ![alt text](image-13.png)
+    {% asset_img image-13.png "alt text" %}
     对卷积层，对每个通道归一化（因为我们认为每个卷积层提取一个特征，形成一个通道，所以一个通道代表一个特征）
 3. 推理阶段为了避免存储所有特征的值进行的改进：
-   ![alt text](image-14.png)
+   {% asset_img image-14.png "alt text" %}
 
 ## Fine Grained Features
 增加 passthrough layer，融合高低分辨率特征，detect 更小物体，提取更细粒度特征。
 
-![alt text](image-15.png)
+{% asset_img image-15.png "alt text" %}
 
 26x26转13x13类似下图，把几个元素拼成某一个通道
-![alt text](image-16.png)
+{% asset_img image-16.png "alt text" %}
 
 ## High Resolution Classifier
 提高目标检测性能。v1 在目标检测时输入分辨率改变，导致学习检测时需要调整权重。v2 预训练不变，增加448x448分辨率的微调，训练目标检测的效果提升。
 
-![alt text](image-17.png)
+{% asset_img image-17.png "alt text" %}
 ## Input Image Size Adjustment
 调整输入图像尺寸为奇数，一般图像在中间，我们用图像中心点来检测，如果偶数方格会像右图一样难以判断中心点落在哪个 grid cell
 
-![alt text](image-18.png)
+{% asset_img image-18.png "alt text" %}
 
 ## Multi-Scale Training
 每10个 batch 换一个分辨率，让模型能处理不同尺寸，且能防止过拟合（工程实现上需要调整标签）
 > high resolution classifier **vs** multi-scale training
->  ![alt text](image-19.png)
+>  {% asset_img image-19.png "alt text" %}
 
 ## Training
 
-![alt text](image-20.png)
+{% asset_img image-20.png "alt text" %}
 
 与 v1 的区别：
 1. 每个 grid cell 预测 5 个 bounding box
@@ -135,19 +136,19 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 ### Anchor Boxes
 利用同种物体形状的共性，预先定义 box 的形状，再计算实际物体的偏移得到预测框。具体公式：
 
-![alt text](image-21.png)
+{% asset_img image-21.png "alt text" %}
 
 > anchor box 用于提高召回率（在所有真实存在的样本中，模型找出了多少），对准确率无益
 
 ### loss function
-![alt text](image-22.png)
+{% asset_img image-22.png "alt text" %}
 
 前 n 步先学习锚框（localization loss）
 
 ### Dimension Clusters
 用能最好覆盖 training data 的 top-K 个 bounding box 做锚框，用 IoU 计算聚类。在选择聚类的个数时使用手肘法，从拐点取值
 
-![alt text](image-23.png)
+{% asset_img image-23.png "alt text" %}
 
 ## 推理阶段
 1. image grid division
@@ -156,7 +157,7 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 
 # v3
 > v1v2 只在最后一层做检测，语义信息强但分辨率低，不利于小物体识别
-![alt text](image-24.png)
+{% asset_img image-24.png "alt text" %}
 
 - backbone 是类似 resnet 的网络，且53层卷积
 - 单元之间的卷积作用：尺寸减半通道翻倍，随网络加深可以强迫网络学高层特征
@@ -165,12 +166,12 @@ $1^{obj}$表示是选中的 IoU 大的 bounding box 就是1，反之是0
 
   
 ## training
-![alt text](image-25.png)
+{% asset_img image-25.png "alt text" %}
 
 高分辨率定义的锚框小，用于识别小物体，低分辨率锚框大，识别大物体。
 
 ### loss function
-![alt text](image-26.png)
+{% asset_img image-26.png "alt text" %}
 不同点：类别损失用交叉熵（**对齐 logits**），允许多个标签；不再使用 sigmoid（t0） 作为置信度
 
 ## 推理阶段

@@ -4,6 +4,7 @@ tags:
   - C/C++
 categories:
   - 干正事
+math: true
 ---
 ## 1 值、地址、指针与引用
 
